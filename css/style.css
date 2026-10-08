@@ -7,6 +7,8 @@
   --glass: rgba(212, 229, 245, 0.045);
   --surface: rgba(16, 17, 25, 0.85);
   --pad: clamp(24px, 5vw, 96px);
+  --nav-height: 88px;
+  --nav-glass: rgba(16, 17, 25, 0.64);
   color-scheme: dark;
 }
 [data-theme="light"] {
@@ -17,6 +19,7 @@
   --line: rgba(31, 48, 67, 0.2);
   --glass: rgba(255, 255, 255, 0.7);
   --surface: rgba(240, 242, 245, 0.9);
+  --nav-glass: rgba(240, 242, 245, 0.72);
   color-scheme: light;
 }
 * {
@@ -24,7 +27,7 @@
 }
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 28px;
+  scroll-padding-top: calc(var(--nav-height) + 24px);
 }
 body {
   margin: 0;
@@ -159,9 +162,28 @@ h2 span {
 .icon-button:hover {
   background: var(--glass);
 }
+/* Закреплённая шапка: контент виден через стекло, меню остаётся читаемым. */
 .nav-shell {
-  height: 88px;
-  margin-inline: var(--pad);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-height);
+  margin-inline: 0;
+  padding-inline: var(--pad);
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0.015) 52%,
+      rgba(142, 202, 230, 0.045)
+    ),
+    var(--nav-glass);
+  backdrop-filter: blur(24px) saturate(145%);
+  -webkit-backdrop-filter: blur(24px) saturate(145%);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1700,4 +1722,33 @@ footer > span:last-child {
   object-position: center 72%;
 }
 /* Статус панорамы на телефоне находится ниже изображения, не поверх него. */
-@media (max-width: 760px) { #panorama { bottom: 35px; } }
+@media (max-width: 760px) {
+  #panorama {
+    bottom: 35px;
+  }
+}
+
+/* Закреплённые блоки и подписи не прячутся под верхним меню. */
+.story-progress {
+  top: calc(var(--nav-height) + 24px);
+}
+.config-preview {
+  top: calc(var(--nav-height) + 20px);
+  height: min(660px, calc(100svh - var(--nav-height) - 48px));
+}
+@media (max-width: 760px) {
+  :root {
+    --nav-height: 76px;
+  }
+  .config-preview {
+    top: calc(var(--nav-height) + 8px);
+    height: 300px;
+  }
+}
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .nav-shell {
+    background: var(--surface);
+  }
+}
