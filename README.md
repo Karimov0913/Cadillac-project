@@ -72,8 +72,8 @@ README.md
 
 ## Скриншоты V2
 
-![Главный экран](assets/v2/preview-desktop.webp)
-![Мобильная версия](assets/v2/preview-mobile.webp)
+![Главный экран](https://karimov0913.github.io/Cadillac-project/assets/v2/preview-desktop.webp)
+![Мобильная версия](https://karimov0913.github.io/Cadillac-project/assets/v2/preview-mobile.webp)
 
 ## Права и точность
 

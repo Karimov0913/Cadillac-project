@@ -1699,3 +1699,5 @@ footer > span:last-child {
 .config-preview.interior .preview-media img {
   object-position: center 72%;
 }
+/* Статус панорамы на телефоне находится ниже изображения, не поверх него. */
+@media (max-width: 760px) { #panorama { bottom: 35px; } }
