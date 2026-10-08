@@ -1,121 +1,189 @@
-// Настоящий записанный V8: binaural stereo / CC0. Осцилляторов нет.
-// Источник overmedium/Freesound 651534. Автомобиль автору записи неизвестен.
+// Монтаж трёх выбранных пользователем CC0-записей. Без осцилляторов.
+// Запуск Corvette, холостой Grand Marquis, газ Aston + низ Corvette.
+const AUDIO_FILES = {
+  ignition: "engine-ignition.mp3",
+  idle: "engine-idle.mp3",
+  rev: "engine-rev.mp3",
+  shutdown: "engine-shutdown.mp3",
+};
 export class EngineAudio {
-  constructor() {
-    this.running = false;
+  constructor({ onStateChange = () => {} } = {}) {
+    this.state = "off";
     this.volume = 0.35;
     this.sources = new Set();
-    this.effectUntil = 0;
+    this.revision = 0;
+    this.revving = false;
+    this.onStateChange = onStateChange;
+  }
+  get running() {
+    return this.state === "starting" || this.state === "running";
+  }
+  changeState(state) {
+    this.state = state;
+    this.onStateChange();
   }
   async init() {
-    if (this.context && this.buffer) {
-      await this.context.resume();
-      return;
+    if (!this.context) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) throw new Error("Web Audio unavailable");
+      const c = (this.context = new AudioCtx());
+      this.master = c.createGain();
+      this.master.gain.value = this.volume;
+      this.compressor = c.createDynamicsCompressor();
+      this.compressor.threshold.value = -12;
+      this.compressor.knee.value = 8;
+      this.compressor.ratio.value = 2;
+      this.compressor.attack.value = 0.012;
+      this.compressor.release.value = 0.18;
+      this.compressor.connect(this.master);
+      this.master.connect(c.destination);
     }
-    if (this.context) {
-      await this.context.close();
-      this.context = null;
+    // Resume вызывается в обработчике жеста, до загрузки файлов (важно для iOS).
+    await this.context.resume();
+    if (this.buffers) return;
+    if (!this.loadingPromise) {
+      this.loadingPromise = Promise.all(
+        Object.entries(AUDIO_FILES).map(async ([key, file]) => {
+          const response = await fetch(
+            new URL("../assets/v2/" + file, import.meta.url),
+          );
+          if (!response.ok) throw new Error("Audio asset unavailable: " + key);
+          return [
+            key,
+            await this.context.decodeAudioData(await response.arrayBuffer()),
+          ];
+        }),
+      )
+        .then((entries) => {
+          this.buffers = Object.fromEntries(entries);
+        })
+        .finally(() => {
+          this.loadingPromise = null;
+        });
     }
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) throw new Error("Web Audio unavailable");
-    this.context = new AudioCtx();
-    const c = this.context;
-    this.master = c.createGain();
-    this.master.gain.value = this.volume;
-    this.compressor = c.createDynamicsCompressor();
-    this.compressor.threshold.value = -10;
-    this.compressor.knee.value = 12;
-    this.compressor.ratio.value = 3;
-    this.compressor.attack.value = 0.008;
-    this.compressor.release.value = 0.18;
-    this.bass = c.createBiquadFilter();
-    this.bass.type = "lowshelf";
-    this.bass.frequency.value = 150;
-    this.bass.gain.value = 2;
-    this.bass.connect(this.compressor);
-    this.compressor.connect(this.master);
-    this.master.connect(c.destination);
-    const response = await fetch(
-      new URL("../assets/v2/v8-binaural.mp3", import.meta.url),
-    );
-    if (!response.ok) throw new Error("Audio asset unavailable");
-    this.buffer = await c.decodeAudioData(await response.arrayBuffer());
-    await c.resume();
+    await this.loadingPromise;
   }
-  play(offset, duration, { loop = false, level = 1, fade = 0.06 } = {}) {
+  play(
+    key,
+    {
+      when = this.context.currentTime,
+      loop = false,
+      level = 1,
+      fadeIn = 0.035,
+      fadeOut = 0.12,
+      onEnded,
+    } = {},
+  ) {
     const c = this.context,
       source = c.createBufferSource(),
       gain = c.createGain();
-    source.buffer = this.buffer;
+    source.buffer = this.buffers[key];
     source.loop = loop;
     if (loop) {
-      source.loopStart = offset;
-      source.loopEnd = offset + duration;
+      source.loopStart = 0;
+      source.loopEnd = source.buffer.duration;
     }
     source.connect(gain);
-    gain.connect(this.bass);
-    const t = c.currentTime;
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(level, t + fade);
-    source.start(t, offset);
+    gain.connect(this.compressor);
+    const duration = source.buffer.duration;
+    gain.gain.setValueAtTime(0, when);
+    gain.gain.linearRampToValueAtTime(level, when + fadeIn);
     if (!loop) {
-      gain.gain.setValueAtTime(level, t + duration - 0.13);
-      gain.gain.linearRampToValueAtTime(0, t + duration);
-      source.stop(t + duration + 0.02);
+      gain.gain.setValueAtTime(level, when + duration - fadeOut);
+      gain.gain.linearRampToValueAtTime(0, when + duration);
     }
+    const item = { source, gain, key, revision: this.revision };
+    this.sources.add(item);
     source.onended = () => {
       this.sources.delete(item);
       source.disconnect();
       gain.disconnect();
+      if (item.revision === this.revision) onEnded?.();
     };
-    const item = { source, gain };
-    this.sources.add(item);
+    source.start(when, 0);
+    if (!loop) source.stop(when + duration + 0.015);
     return item;
   }
   async start() {
-    await this.init();
-    if (this.running) return;
-    this.running = true;
-    this.play(0.25, 1.45, { level: 0.7 });
-    this.idle = this.play(5.55, 1.9, { loop: true, level: 0.42, fade: 0.5 });
+    if (this.state !== "off" || this.loading) return false;
+    const revision = ++this.revision;
+    this.loading = true;
+    try {
+      await this.init();
+      if (revision !== this.revision) return false;
+      this.changeState("starting");
+      const t = this.context.currentTime,
+        duration = this.buffers.ignition.duration;
+      this.play("ignition", {
+        when: t,
+        onEnded: () => {
+          if (this.state === "starting") this.changeState("running");
+        },
+      });
+      // Холостой ход вступает в конце запуска, а не одновременно со стартером.
+      this.idle = this.play("idle", {
+        when: t + duration - 0.32,
+        loop: true,
+        level: 0.9,
+        fadeIn: 0.45,
+      });
+      return true;
+    } finally {
+      this.loading = false;
+    }
   }
-  stop() {
+  rev() {
+    if (this.state !== "running" || this.revving) return false;
+    this.revving = true;
+    const t = this.context.currentTime,
+      duration = this.buffers.rev.duration;
+    this.idle.gain.gain.cancelScheduledValues(t);
+    this.idle.gain.gain.setTargetAtTime(0.14, t, 0.06);
+    this.idle.gain.gain.setTargetAtTime(0.9, t + duration - 0.25, 0.2);
+    this.play("rev", {
+      onEnded: () => {
+        this.revving = false;
+        this.onStateChange();
+      },
+    });
+    this.onStateChange();
+    return true;
+  }
+  fadeAll(seconds = 0.16) {
     if (!this.context) return;
-    this.running = false;
-    this.effectUntil = 0;
     const t = this.context.currentTime;
     for (const item of this.sources) {
       item.gain.gain.cancelScheduledValues(t);
-      item.gain.gain.setTargetAtTime(0, t, 0.06);
+      item.gain.gain.setTargetAtTime(0, t, seconds / 4);
       try {
-        item.source.stop(t + 0.25);
+        item.source.stop(t + seconds);
       } catch {}
     }
     this.idle = null;
+    this.revving = false;
   }
-  duckIdle(duration) {
-    if (!this.idle) return;
-    const t = this.context.currentTime;
-    this.idle.gain.gain.cancelScheduledValues(t);
-    this.idle.gain.gain.setTargetAtTime(0.07, t, 0.04);
-    this.idle.gain.gain.setTargetAtTime(0.42, t + duration, 0.18);
-  }
-  rev() {
-    if (!this.running || performance.now() < this.effectUntil) return false;
-    this.effectUntil = performance.now() + 3150;
-    this.duckIdle(2.8);
-    this.play(1.8, 3.15, { level: 0.85 });
+  shutdown() {
+    if (!this.running) return false;
+    ++this.revision;
+    this.fadeAll();
+    this.changeState("stopping");
+    // Отдельный смонтированный спад двигателя: не резкое отключение Gain.
+    this.play("shutdown", {
+      fadeIn: 0.08,
+      onEnded: () => this.changeState("off"),
+    });
     return true;
   }
-  exhaust() {
-    if (!this.running || performance.now() < this.effectUntil) return false;
-    this.effectUntil = performance.now() + 3000;
-    this.duckIdle(2.7);
-    this.play(3.85, 3, { level: 0.95 });
-    return true;
+  stop() {
+    // Скрытие вкладки/уход со страницы: немедленно гасим всё, без звука выключения.
+    ++this.revision;
+    this.fadeAll(0.08);
+    this.changeState("off");
   }
   setVolume(value) {
-    this.volume = Math.min(1, Math.max(0, value));
+    this.volume = Number.isFinite(value)
+      ? Math.min(1, Math.max(0, value))
+      : 0.35;
     this.master?.gain.setTargetAtTime(
       this.volume,
       this.context.currentTime,

@@ -1752,3 +1752,9 @@ footer > span:last-child {
     background: var(--surface);
   }
 }
+/* Работающий двигатель отображается читаемо, хотя повторный запуск заблокирован. */
+.engine-button:disabled {
+  opacity: 1;
+  cursor: default;
+  background: rgba(142, 202, 230, 0.06);
+}

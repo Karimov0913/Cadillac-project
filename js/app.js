@@ -344,7 +344,7 @@ const dataNote = document.createElement("p");
 dataNote.textContent = dataDisclaimer;
 $("source-notes").append(dataNote);
 // Записанный V8 — без осцилляторов, с сохранением стереоканалов.
-const engine = new EngineAudio();
+const engine = new EngineAudio({ onStateChange: audioUI });
 for (let i = 0; i < 40; i++) {
   const bar = document.createElement("i");
   bar.style.setProperty("--h", `${5 + Math.sin(i * 0.67) ** 2 * 23}px`);
@@ -352,45 +352,55 @@ for (let i = 0; i < 40; i++) {
   document.querySelector(".equalizer").append(bar);
 }
 function audioUI() {
-  const on = engine.running;
-  $("engine-start").setAttribute("aria-pressed", String(on));
-  $("engine-label").textContent = on ? "Выключить V8" : "Включить V8";
-  $("sound-status").textContent = on ? "BINAURAL / LIVE" : "OFF";
-  $("rev").disabled = !on;
-  $("exhaust").disabled = !on;
-  document.querySelector(".sound-panel").classList.toggle("running", on);
+  const phase = engine.state;
+  $("engine-start").setAttribute("aria-pressed", String(phase !== "off"));
+  $("engine-start").disabled = phase !== "off";
+  $("engine-label").textContent = {
+    off: "Завести двигатель",
+    starting: "Запуск двигателя…",
+    running: "Двигатель работает",
+    stopping: "Выключение двигателя…",
+  }[phase];
+  $("sound-status").textContent = {
+    off: "OFF",
+    starting: "IGNITION",
+    running: engine.revving ? "REV / STEREO" : "V8 / IDLE",
+    stopping: "SHUTDOWN",
+  }[phase];
+  $("rev").disabled = phase !== "running" || engine.revving;
+  $("rev").textContent = engine.revving ? "Газ…" : "Газ ↗";
+  $("engine-stop").disabled = !engine.running;
+  document
+    .querySelector(".sound-panel")
+    .classList.toggle("running", phase !== "off");
 }
 let starting = false;
 $("engine-start").addEventListener("click", async () => {
-  if (starting) return;
+  if (starting || engine.state !== "off") return;
   starting = true;
+  $("engine-start").disabled = true;
+  $("engine-label").textContent = "Загружаем звук…";
   try {
-    if (engine.running) engine.stop();
-    else {
-      await engine.start();
-      studio.shake();
-    }
-    audioUI();
+    if (await engine.start()) studio.shake();
   } catch {
-    toast(
-      "Не удалось загрузить запись V8. Проверьте подключение или обновите страницу.",
-    );
+    toast("Не удалось загрузить звук двигателя. Попробуйте ещё раз.");
   } finally {
     starting = false;
+    audioUI();
   }
 });
 $("rev").addEventListener("click", () => {
   if (engine.rev()) studio.shake();
 });
-$("exhaust").addEventListener("click", () => {
-  if (engine.exhaust()) studio.shake();
+$("engine-stop").addEventListener("click", () => {
+  if (engine.shutdown()) studio.shake();
 });
 $("volume").addEventListener("input", (e) => {
   engine.setVolume(Number(e.target.value) / 100);
   $("volume-value").textContent = e.target.value + "%";
 });
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden && engine.running) {
+  if (document.hidden && (engine.state !== "off" || engine.loading)) {
     engine.stop();
     audioUI();
   }

@@ -87,7 +87,12 @@ try {
         (y) => scrollTo({ top: y, behavior: "instant" }),
         storyTop + height * 4.7 * ((i + 0.65) / 5),
       );
-      await p.waitForFunction(() => Math.abs(document.querySelector("#story-stage").getBoundingClientRect().top) < 3);
+      await p.waitForFunction(
+        () =>
+          Math.abs(
+            document.querySelector("#story-stage").getBoundingClientRect().top,
+          ) < 3,
+      );
       await p.waitForFunction(
         (i) =>
           Number(
@@ -170,11 +175,16 @@ try {
     assert.equal(audio.channels, 2);
     assert.ok(audio.energy > 0 && audio.difference > 0);
     assert.equal(audio.state, "running");
+    await p.waitForFunction(
+      () => document.querySelector("#sound-status").textContent === "V8 / IDLE",
+    );
     await p.locator("#rev").click();
     await p.waitForTimeout(3250);
-    await p.locator("#exhaust").click();
+    await p.locator("#engine-stop").click();
     await p.screenshot({ path: `${shots}/sound-${width}.png` });
-    await p.locator("#engine-start").click();
+    await p.waitForFunction(
+      () => document.querySelector("#sound-status").textContent === "OFF",
+    );
     await p.locator("#craft").evaluate((e) =>
       scrollTo({
         top: e.getBoundingClientRect().top + scrollY,
