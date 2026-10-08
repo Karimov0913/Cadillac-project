@@ -31,7 +31,7 @@ if (fs.existsSync("asset-packs"))
       fs.writeFileSync(dest, Buffer.from(record.data, "base64"));
     }
   }
-await build({
+const bundled = await build({
   entryPoints: ["js/app.js"],
   bundle: true,
   minify: true,
@@ -39,10 +39,28 @@ await build({
   splitting: true,
   target: ["es2022"],
   outdir: "dist/js",
-  entryNames: "app",
+  entryNames: "app-[hash]",
+  metafile: true,
   chunkNames: "[name]-[hash]",
   legalComments: "eof",
 });
+// Новый HTML не должен брать JS/CSS от V1 из старого Service Worker.
+const entry = Object.entries(bundled.metafile.outputs).find(
+  ([, value]) => value.entryPoint === "js/app.js",
+)[0];
+const css = fs.readFileSync("dist/css/style.css");
+const cssHash = crypto
+  .createHash("sha256")
+  .update(css)
+  .digest("hex")
+  .slice(0, 10);
+const cssName = `style-${cssHash}.css`;
+fs.renameSync("dist/css/style.css", `dist/css/${cssName}`);
+const html = fs
+  .readFileSync("dist/index.html", "utf8")
+  .replace("./js/app.js", "./" + entry.slice(5))
+  .replace("./css/style.css", "./css/" + cssName);
+fs.writeFileSync("dist/index.html", html);
 const files = [];
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

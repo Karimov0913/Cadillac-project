@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "checkedAt": "2026-10-08T10:03:45.755Z",
+  "checkedAt": "2026-10-08T10:15:05.353Z",
   "results": [
     {
       "width": 1920,
@@ -36,5 +36,9 @@
       "reducedMotion": true,
       "allScenesReadable": true
     }
-  ]
+  ],
+  "cacheUpgrade": {
+    "staleV1AssetsBypassed": true,
+    "consoleErrors": []
+  }
 }

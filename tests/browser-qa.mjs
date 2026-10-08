@@ -87,6 +87,7 @@ try {
         (y) => scrollTo({ top: y, behavior: "instant" }),
         storyTop + height * 4.7 * ((i + 0.65) / 5),
       );
+      await p.waitForFunction(() => Math.abs(document.querySelector("#story-stage").getBoundingClientRect().top) < 3);
       await p.waitForFunction(
         (i) =>
           Number(
