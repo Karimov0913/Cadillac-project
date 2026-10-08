@@ -25,11 +25,11 @@
 
 ## Скриншоты
 
-Скриншоты реального Chromium. Изображения появятся по ссылкам после успешного Pages-деплоя.
+Скриншоты реального Chromium. SVG-обёртки содержат встроенный растровый снимок и не зависят от работающего Pages-деплоя.
 
-![Desktop 1920px](https://Karimov0913.github.io/Cadillac-project/assets/images/preview-desktop.webp)
+![Desktop 1920px](./assets/images/preview-desktop.svg)
 
-![Mobile 375px](https://Karimov0913.github.io/Cadillac-project/assets/images/preview-mobile.webp)
+![Mobile 375px](./assets/images/preview-mobile.svg)
 
 ## Быстрый запуск
 
@@ -90,6 +90,8 @@ assets/
     cabin.webp.b64
     preview-desktop.webp.b64
     preview-mobile.webp.b64
+    preview-desktop.svg   # встроенный снимок для README
+    preview-mobile.svg
     credits.json
     favicon.svg
   sounds/README.md        # почему нет сторонних аудиозаписей
