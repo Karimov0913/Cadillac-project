@@ -46,7 +46,9 @@ npm start
 
 ## GitHub Pages: публикация одной командой
 
-Workflow `.github/workflows/pages.yml` выполняет тесты, сборку, загрузку артефакта и деплой при push в `main`.
+**Статус публикации:** код загружен в репозиторий, но подключённый GitHub-токен запрещает запись `.github/workflows/` (403). Поэтому в GitHub сохранён шаблон `deployment/pages.yml`, а активный workflow пока не установлен и живой Pages-деплой не подтверждён. В готовом архиве файл `.github/workflows/pages.yml` уже присутствует.
+
+`npm run deploy` автоматически копирует шаблон в `.github/workflows/pages.yml`, выполняет тесты/сборку и отправляет коммит. Используйте собственную Git-авторизацию с правом записи workflow (SSH или подходящий токен с разрешением Workflows). Workflow после установки выполняет тесты, сборку, загрузку артефакта и деплой при push в `main`.
 
 Первичная настройка GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Workflow также пытается включить Pages автоматически через `enablement: true`. Если политика GitHub не позволяет токену включить Pages, настройте Source вручную и перезапустите workflow. Проверьте, что Actions разрешены для репозитория.
 
@@ -58,7 +60,7 @@ npm run deploy
 
 Команда тестирует, собирает, добавляет только известные файлы проекта, создаёт коммит при изменениях и выполняет `git push origin main`. GitHub Actions публикует сайт:
 
-**https://Karimov0913.github.io/Cadillac-project/**
+Ожидаемый адрес после успешной настройки и деплоя: **https://Karimov0913.github.io/Cadillac-project/**
 
 Для уже закоммиченных изменений достаточно `git push origin main`. Локальная сборка:
 
@@ -100,7 +102,8 @@ tests/
   data.test.mjs          # Node unit tests
   browser-qa.mjs         # функциональная браузерная проверка
   qa-results.json        # отчёт проверки
-.github/workflows/pages.yml
+deployment/pages.yml      # шаблон workflow, доступный в GitHub
+.github/workflows/pages.yml # в архиве / создаётся npm run deploy
 package.json
 package-lock.json
 SOURCES.md
