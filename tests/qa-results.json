@@ -1,0 +1,40 @@
+{
+  "checks": [
+    "1920px: GLB and WebGL loaded",
+    "Auto-rotation starts after 5s idle",
+    "Interaction stops auto-rotation",
+    "Paint and leather selection work",
+    "Web Audio outputs non-zero PCM; engine/rev/exhaust work",
+    "Share URL encodes both colours",
+    "Theme persists after reload",
+    "Gallery navigation and local photos work",
+    "Fuel estimator handles zero and weighted mpg",
+    "375px: no horizontal page overflow",
+    "Interior camera preset works",
+    "Offline reload: model, photos, JS and audio work",
+    "Reduced motion disables automatic rotation",
+    "No console errors or uncaught exceptions",
+    "No-WebGL fallback shows photo and retry, without console errors"
+  ],
+  "errors": [],
+  "audioRms": 0.0029841841503302296,
+  "unitTests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "visualQA": {
+    "desktopWidth": 1920,
+    "mobileWidth": 375,
+    "reviewed": [
+      "hero",
+      "configuration",
+      "interior cutaway",
+      "comparison / source notes",
+      "gallery / technology",
+      "ownership",
+      "light theme",
+      "no-WebGL fallback"
+    ],
+    "horizontalOverflow": false
+  }
+}

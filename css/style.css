@@ -25,3 +25,6 @@ tbody th{font-size:12px;color:var(--muted);padding:22px 25px}
 .volume-label{flex-wrap:wrap}.volume-label input{flex-basis:35%}
 @media(max-width:760px){.hero-spec small{font-size:9px;letter-spacing:.4px}.section-heading>p,.hero-copy p,.config-panel>.muted,.sound-disclaimer,.model-note,.tech-card p,.tech-card>small,.ownership-note,.formula-note,footer p{font-size:14px}.tech-card .eyebrow{font-size:10px}.calculator select{font-size:12px}.hero h1{font-size:clamp(50px,12.8vw,94px)}.model-note{overflow-wrap:anywhere}}
 @media(max-width:760px){.swatches{gap:3px}.leather-swatches{gap:8px}.config-panel .muted br{display:initial}}
+.tech-icon svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){.swatches{gap:2px}.leather-swatches{gap:8px}.hero-bottom{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px;row-gap:14px;align-items:start;align-content:center}.hero-spec{min-width:0}.hero-spec small{font-size:8px;line-height:1.5;max-width:100%;overflow-wrap:normal}.scroll-cue{grid-column:1/-1}}
+td small{font-size:12px}

@@ -16,14 +16,16 @@ export const interiors=[
 export const comparison=[
  {label:'Мощность',values:['682 hp','420 hp','440 hp'],em:true},
  {label:'Двигатель',values:['6.2L Supercharged V8','6.2L V8','3.5L Twin-Turbo V6']},
- {label:'0–60 mph · данные источников',values:['4.4 с¹','6.1 с²','Не подтверждено³'],em:true},
- {label:'Цена / ориентир USD',values:['От $172,300¹','$101,245²','≈ $110,000⁴']},
- {label:'0–60 mph · ориентиры задания⁴',values:['4.4 с','5.4 с','5.1 с']}
+ {label:'0–60 mph · данные источников',values:['4.4 с¹','6.1 с²','5.34 с³'],notes:['Оценка Cadillac','Обзор 6.2L V8','Симуляция · без rollout'],em:true},
+ {label:'Цена в источниках / USD',values:['От $172,300¹','$101,245²','$113,795³']},
+ {label:'0–60 mph · ориентиры задания⁴',values:['4.4 с','5.4 с','5.1 с']},
+ {label:'Цены из задания / USD⁴',values:['$172,300','$100,000','$110,000']}
 ];
 export const sources=[
  {label:'Cadillac · Escalade-V (2027)',url:'https://www.cadillac.com/suv/escalade/v-series',note:'¹ 682 hp, 6.2L Supercharged V8, 653 lb-ft, 4,4 с — оценка Cadillac для Escalade-V, не отдельный тест ESV. Цена ESV $172 300; короткая версия $169 300. Налоги, доставка, опции и сборы не включены. Новая версия: 55″ Horizon Display, 38 динамиков AKG. Производитель не называет новый 55″ дисплей OLED.'},
  {label:'MotorTrend · GMC Yukon 2024',url:'https://www.motortrend.com/cars/gmc/yukon/2024',note:'² Цена Yukon Denali Ultimate 4WD (2024) $101 245 по таблице MotorTrend. 420 hp, 6.2L V8, 6,1 с — обзор конфигурации с 6.2L V8, не отдельный подтверждённый тест Denali Ultimate. Годы и методики измерений различаются.'},
- {label:'Edmunds · Navigator L Black Label 2024',url:'https://www.edmunds.com/lincoln/navigator/2024/st-402008812/features-specs/',note:'³ Подтверждает 440 hp и двигатель 3.5L V6 Twin-Turbo. Подтверждённый инструментальный тест 5,1 с именно этой версии не найден; в основной строке не подменён тестом другой комплектации.'},
+ {label:'Motor Matchup · Navigator L Black Label 2024',url:'https://www.motormatchup.com/catalog/Lincoln/Navigator-L/2024/Black-Label-4x4',note:'³ Каталог: 440 hp, 3.5L Twin-Turbo V6, MSRP $113 795. Разгон 5,34 с без rollout — расчётная симуляция Motor Matchup, не дорожный тест. В заголовке сайта 5,1 с — округлённая симуляция с 1ft rollout (5,07 с). Методы Cadillac, MotorTrend и симуляции не сопоставимы напрямую.'},
+ {label:'Edmunds · Navigator L Black Label 2024',url:'https://www.edmunds.com/lincoln/navigator/2024/st-402008812/features-specs/',note:'Подтверждает 440 hp и двигатель 3.5L V6 Twin-Turbo. Подтверждённый инструментальный тест 5,1 с именно этой версии не найден; в основной строке не подменён тестом другой комплектации.'},
  {label:'Cadillac · Digital Brochure 2024',url:'https://brochures.cadillac.com/2024/escalade',note:'36 динамиков AKG относятся к модели 2024. Не объединяем эту спецификацию с 55″ дисплеем новой версии.'},
  {label:'DELLA · Escalade-V 2024 fuel economy',url:'https://www.dellagm.com/cadillac-escalade-v-overview.html',note:'Справочный расход 2024: 11 city / 16 highway mpg (US). 11 / 17 mpg доступен как отдельный сценарий из задания, а не сертифицированный показатель новой ESV.'}
 ];

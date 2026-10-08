@@ -18,7 +18,9 @@ function sidePanel(name,points,z,m){const s=new T.Shape();points.forEach(([x,y],
 function sheet(name,vertices,m){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices.flat(),3));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();const o=new T.Mesh(g,m);o.name=name;car.add(o);return o;}
 // Нижний профиль с настоящими вырезами колёсных арок.
 const body=new T.Shape();body.moveTo(-2.88,.7);body.lineTo(-2.88,1.14);body.quadraticCurveTo(-2.8,1.38,-2.5,1.4);body.lineTo(-1.3,1.42);body.lineTo(2.66,1.4);body.quadraticCurveTo(2.88,1.38,2.88,1.17);body.lineTo(2.88,.64);body.lineTo(2.23,.64);body.absarc(1.67,.55,.57,.15,Math.PI-.15,false);body.lineTo(-1.16,.64);body.absarc(-1.72,.55,.57,.15,Math.PI-.15,false);body.lineTo(-2.88,.7);
-const bgeo=new T.ExtrudeGeometry(body,{depth:1.99,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.035,bevelThickness:.035,curveSegments:20});bgeo.translate(0,0,-.995);const shell=new T.Mesh(bgeo,paint);shell.name='Body_Shell';car.add(shell);
+const bgeo=new T.ExtrudeGeometry(body,{depth:.065,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.015,bevelThickness:.015,curveSegments:20});for(const z of [-1.015,.95]){const shell=new T.Mesh(bgeo,paint);shell.name='Body_Shell';shell.position.z=z;car.add(shell);}
+box('Cabin_Floor',.55,.76,0,3.98,.11,1.82,black,.02);
+box('Tailgate',2.82,1.075,0,.12,.66,1.95,paint,.025);
 box('Chassis',0,.51,0,5.25,.15,1.75,black);
 box('Roof',.55,1.96,0,4.14,.105,1.84,paint,.05);
 box('Hood',-2.12,1.42,0,1.41,.1,1.96,paint,.045);
