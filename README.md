@@ -46,11 +46,11 @@ npm start
 
 ## GitHub Pages: публикация одной командой
 
-**Статус публикации:** код загружен в репозиторий, но подключённый GitHub-токен запрещает запись `.github/workflows/` (403). Поэтому в GitHub сохранён шаблон `deployment/pages.yml`, а активный workflow пока не установлен и живой Pages-деплой не подтверждён. В готовом архиве файл `.github/workflows/pages.yml` уже присутствует.
+**Статус публикации:** сайт опубликован на https://karimov0913.github.io/Cadillac-project/. Исправленный workflow `.github/workflows/pages.yml` успешно выполнил сборку и деплой: https://github.com/Karimov0913/Cadillac-project/actions/runs/37745453932.
 
-`npm run deploy` автоматически копирует шаблон в `.github/workflows/pages.yml`, выполняет тесты/сборку и отправляет коммит. Используйте собственную Git-авторизацию с правом записи workflow (SSH или подходящий токен с разрешением Workflows). Workflow после установки выполняет тесты, сборку, загрузку артефакта и деплой при push в `main`.
+Workflow выполняет тесты, сборку, загрузку артефакта `dist/` и публикацию при push в `main`. Не вставляйте команды терминала в YAML-файл. `deployment/pages.yml` — резервная копия правильного workflow. `npm run deploy` устанавливает этот шаблон, тестирует/собирает проект и отправляет коммит; альтернативно можно использовать обычный `git push` после коммита.
 
-Первичная настройка GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Workflow также пытается включить Pages автоматически через `enablement: true`. Если политика GitHub не позволяет токену включить Pages, настройте Source вручную и перезапустите workflow. Проверьте, что Actions разрешены для репозитория.
+Первичная настройка GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Проверьте, что Actions разрешены для репозитория.
 
 После клонирования, `npm ci` и настройки авторизации Git:
 
@@ -60,7 +60,7 @@ npm run deploy
 
 Команда тестирует, собирает, добавляет только известные файлы проекта, создаёт коммит при изменениях и выполняет `git push origin main`. GitHub Actions публикует сайт:
 
-Ожидаемый адрес после успешной настройки и деплоя: **https://Karimov0913.github.io/Cadillac-project/**
+Адрес опубликованного сайта: **https://karimov0913.github.io/Cadillac-project/**
 
 Для уже закоммиченных изменений достаточно `git push origin main`. Локальная сборка:
 
@@ -104,8 +104,8 @@ tests/
   data.test.mjs          # Node unit tests
   browser-qa.mjs         # функциональная браузерная проверка
   qa-results.json        # отчёт проверки
-deployment/pages.yml      # шаблон workflow, доступный в GitHub
-.github/workflows/pages.yml # в архиве / создаётся npm run deploy
+deployment/pages.yml      # резервная копия workflow
+.github/workflows/pages.yml # активный workflow GitHub Actions
 package.json
 package-lock.json
 SOURCES.md
