@@ -1,21 +1,129 @@
-// Звук создаётся локально: V8 firing pulses, гармоники, шум впуска и burble.
-// Это художественная синтезация, а не запись конкретного 6.2L двигателя.
-export class EngineAudio{
- constructor(){this.running=false;this.volume=.25;this.rpm=850;this.nodes=[];this.timers=[];this.effectUntil=0;}
- async init(){if(this.context){await this.context.resume();return;}const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('Web Audio API не поддерживается');this.context=new AudioCtx();const c=this.context;
-  this.master=c.createGain();this.master.gain.value=this.volume*.35;this.compressor=c.createDynamicsCompressor();this.compressor.threshold.value=-16;this.compressor.ratio.value=6;this.compressor.connect(this.master);this.master.connect(c.destination);
-  this.engineGain=c.createGain();this.engineGain.gain.value=0;this.filter=c.createBiquadFilter();this.filter.type='lowpass';this.filter.frequency.value=900;this.filter.Q.value=.7;this.filter.connect(this.engineGain);this.engineGain.connect(this.compressor);
-  // Смесь фундаментального импульса V8 и нескольких гармоник.
-  for(let h=1;h<=7;h++){const o=c.createOscillator(),g=c.createGain();o.type=h===1?'sawtooth':'sine';o.frequency.value=850/15*h;g.gain.value=.12/(h*h);o.connect(g);g.connect(this.filter);o.start();this.nodes.push({o,g,h});}
-  const buffer=c.createBuffer(1,c.sampleRate*2,c.sampleRate);const data=buffer.getChannelData(0);let previous=0;for(let i=0;i<data.length;i++){previous=(previous+(Math.random()*2-1)*.09)/1.025;data[i]=previous*.7;}this.noise=c.createBufferSource();this.noise.buffer=buffer;this.noise.loop=true;this.noiseFilter=c.createBiquadFilter();this.noiseFilter.type='bandpass';this.noiseFilter.frequency.value=600;this.noiseGain=c.createGain();this.noiseGain.gain.value=.035;this.noise.connect(this.noiseFilter);this.noiseFilter.connect(this.noiseGain);this.noiseGain.connect(this.filter);this.noise.start();
-  this.lfo=c.createOscillator();this.lfo.frequency.value=9;this.lfoGain=c.createGain();this.lfoGain.gain.value=.05;this.lfo.connect(this.lfoGain);this.lfoGain.connect(this.engineGain.gain);this.lfo.start();await c.resume();
- }
- async start(){await this.init();if(this.running)return;this.running=true;const t=this.context.currentTime;this.engineGain.gain.cancelScheduledValues(t);this.engineGain.gain.setValueAtTime(0,t);this.engineGain.gain.linearRampToValueAtTime(.8,t+.2);this.engineGain.gain.linearRampToValueAtTime(.5,t+1.8);this.setRPM(280,0);this.setRPM(1600,.55);this.timers.push(setTimeout(()=>{if(this.running)this.setRPM(850,.9)},650));}
- stop(){if(!this.context)return;this.running=false;this.timers.forEach(clearTimeout);this.timers=[];this.effectUntil=0;const t=this.context.currentTime;this.engineGain.gain.cancelScheduledValues(t);this.engineGain.gain.setTargetAtTime(0,t,.15);this.lfoGain.gain.setValueAtTime(0,t);this.setRPM(200,.6);}
- setRPM(rpm,duration=.2){this.rpm=rpm;if(!this.context)return;const t=this.context.currentTime;this.nodes.forEach(({o,h})=>{o.frequency.cancelScheduledValues(t);o.frequency.setValueAtTime(o.frequency.value,t);o.frequency.linearRampToValueAtTime(rpm/15*h,t+duration)});this.filter.frequency.setTargetAtTime(450+rpm*.35,t,.12);this.noiseGain.gain.setTargetAtTime(.025+rpm/100000,t,.1);if(this.running)this.lfoGain.gain.setValueAtTime(.045,t);}
- rev(){if(!this.running||performance.now()<this.effectUntil)return false;this.effectUntil=performance.now()+1800;this.setRPM(4800,.65);this.timers.push(setTimeout(()=>{if(this.running){this.setRPM(850,1);this.burble(5)}},720));return true;}
- exhaust(){if(!this.running||performance.now()<this.effectUntil)return false;this.effectUntil=performance.now()+1100;this.setRPM(1900,.12);this.burble(8);this.timers.push(setTimeout(()=>{if(this.running)this.setRPM(850,.55)},450));return true;}
- burble(count){const c=this.context;for(let i=0;i<count;i++){const t=c.currentTime+i*.085+Math.random()*.04;const o=c.createOscillator(),gain=c.createGain();o.type='triangle';o.frequency.setValueAtTime(70+Math.random()*70,t);o.frequency.exponentialRampToValueAtTime(30,t+.11);gain.gain.setValueAtTime(.12,t);gain.gain.exponentialRampToValueAtTime(.001,t+.12);o.connect(gain);gain.connect(this.compressor);o.start(t);o.stop(t+.14);o.onended=()=>{o.disconnect();gain.disconnect();};}}
- setVolume(value){this.volume=Math.max(0,Math.min(1,value));if(this.master)this.master.gain.setTargetAtTime(this.volume*.35,this.context.currentTime,.05);}
- async dispose(){this.stop();await this.context?.close();}
+// Настоящий записанный V8: binaural stereo / CC0. Осцилляторов нет.
+// Источник overmedium/Freesound 651534. Автомобиль автору записи неизвестен.
+export class EngineAudio {
+  constructor() {
+    this.running = false;
+    this.volume = 0.35;
+    this.sources = new Set();
+    this.effectUntil = 0;
+  }
+  async init() {
+    if (this.context && this.buffer) {
+      await this.context.resume();
+      return;
+    }
+    if (this.context) {
+      await this.context.close();
+      this.context = null;
+    }
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) throw new Error("Web Audio unavailable");
+    this.context = new AudioCtx();
+    const c = this.context;
+    this.master = c.createGain();
+    this.master.gain.value = this.volume;
+    this.compressor = c.createDynamicsCompressor();
+    this.compressor.threshold.value = -10;
+    this.compressor.knee.value = 12;
+    this.compressor.ratio.value = 3;
+    this.compressor.attack.value = 0.008;
+    this.compressor.release.value = 0.18;
+    this.bass = c.createBiquadFilter();
+    this.bass.type = "lowshelf";
+    this.bass.frequency.value = 150;
+    this.bass.gain.value = 2;
+    this.bass.connect(this.compressor);
+    this.compressor.connect(this.master);
+    this.master.connect(c.destination);
+    const response = await fetch(
+      new URL("../assets/v2/v8-binaural.mp3", import.meta.url),
+    );
+    if (!response.ok) throw new Error("Audio asset unavailable");
+    this.buffer = await c.decodeAudioData(await response.arrayBuffer());
+    await c.resume();
+  }
+  play(offset, duration, { loop = false, level = 1, fade = 0.06 } = {}) {
+    const c = this.context,
+      source = c.createBufferSource(),
+      gain = c.createGain();
+    source.buffer = this.buffer;
+    source.loop = loop;
+    if (loop) {
+      source.loopStart = offset;
+      source.loopEnd = offset + duration;
+    }
+    source.connect(gain);
+    gain.connect(this.bass);
+    const t = c.currentTime;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(level, t + fade);
+    source.start(t, offset);
+    if (!loop) {
+      gain.gain.setValueAtTime(level, t + duration - 0.13);
+      gain.gain.linearRampToValueAtTime(0, t + duration);
+      source.stop(t + duration + 0.02);
+    }
+    source.onended = () => {
+      this.sources.delete(item);
+      source.disconnect();
+      gain.disconnect();
+    };
+    const item = { source, gain };
+    this.sources.add(item);
+    return item;
+  }
+  async start() {
+    await this.init();
+    if (this.running) return;
+    this.running = true;
+    this.play(0.25, 1.45, { level: 0.7 });
+    this.idle = this.play(5.55, 1.9, { loop: true, level: 0.42, fade: 0.5 });
+  }
+  stop() {
+    if (!this.context) return;
+    this.running = false;
+    this.effectUntil = 0;
+    const t = this.context.currentTime;
+    for (const item of this.sources) {
+      item.gain.gain.cancelScheduledValues(t);
+      item.gain.gain.setTargetAtTime(0, t, 0.06);
+      try {
+        item.source.stop(t + 0.25);
+      } catch {}
+    }
+    this.idle = null;
+  }
+  duckIdle(duration) {
+    if (!this.idle) return;
+    const t = this.context.currentTime;
+    this.idle.gain.gain.cancelScheduledValues(t);
+    this.idle.gain.gain.setTargetAtTime(0.07, t, 0.04);
+    this.idle.gain.gain.setTargetAtTime(0.42, t + duration, 0.18);
+  }
+  rev() {
+    if (!this.running || performance.now() < this.effectUntil) return false;
+    this.effectUntil = performance.now() + 3150;
+    this.duckIdle(2.8);
+    this.play(1.8, 3.15, { level: 0.85 });
+    return true;
+  }
+  exhaust() {
+    if (!this.running || performance.now() < this.effectUntil) return false;
+    this.effectUntil = performance.now() + 3000;
+    this.duckIdle(2.7);
+    this.play(3.85, 3, { level: 0.95 });
+    return true;
+  }
+  setVolume(value) {
+    this.volume = Math.min(1, Math.max(0, value));
+    this.master?.gain.setTargetAtTime(
+      this.volume,
+      this.context.currentTime,
+      0.07,
+    );
+  }
+  async dispose() {
+    this.stop();
+    await this.context?.close();
+  }
 }

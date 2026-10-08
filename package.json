@@ -1,7 +1,7 @@
 {
   "name": "cadillac-v-studio",
-  "version": "1.0.0",
-  "description": "Independent Escalade V-Series ESV immersive 3D configurator",
+  "version": "2.0.0",
+  "description": "Cadillac photographic 360 studio, pinned cinematic storytelling and recorded binaural V8",
   "main": "index.js",
   "scripts": {
     "build": "node scripts/build.mjs",

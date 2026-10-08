@@ -1,30 +1,249 @@
-// Запуск вручную: NODE_PATH не нужен, Playwright используется из окружения QA.
-import{chromium}from'playwright';import assert from'node:assert/strict';import fs from'node:fs';
-const base=process.env.QA_URL||'http://localhost:4173/';const output=process.env.QA_OUTPUT||'/data';
-const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/local/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader','--disable-dev-shm-usage']});
-const context=await browser.newContext({viewport:{width:1920,height:1080},permissions:['clipboard-read','clipboard-write']});const errors=[];const checks=[];
-await context.addInitScript(()=>{const Native=window.AudioContext;window.AudioContext=class extends Native{constructor(...args){super(...args);window.__qaAudio=this;}};const connect=AudioNode.prototype.connect;AudioNode.prototype.connect=function(destination,...args){if(destination instanceof AudioDestinationNode){const analyser=this.context.createAnalyser();analyser.fftSize=2048;connect.call(this,analyser);window.__qaMeter=analyser;}return connect.call(this,destination,...args);};});
-const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-const ready=async()=>{await page.waitForFunction(()=>document.documentElement.dataset.modelReady==='true',{timeout:60000});await page.waitForTimeout(1300);};
-const shot=async(name)=>{await page.screenshot({path:output+'/'+name+'.png'});console.log('Captured',name);};
-try{await page.goto(base);await ready();await shot('qa-desktop');assert.equal(await page.locator('canvas').count(),1);checks.push('1920px: GLB and WebGL loaded');
-assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-await page.waitForFunction(()=>document.getElementById('rotation-label').textContent.includes('АВТОВРАЩЕНИЕ'),{timeout:10000});checks.push('Auto-rotation starts after 5s idle');
-await page.locator('#viewer').dispatchEvent('pointermove',{clientX:800,clientY:600,pointerType:'mouse'});await page.waitForTimeout(100);assert.ok((await page.locator('#rotation-label').textContent()).includes('ПОТЯНИТЕ'));checks.push('Interaction stops auto-rotation');
-await page.locator('[data-view=side]').click();await page.waitForTimeout(1100);await page.locator('[data-view=reset]').click();await page.waitForTimeout(1100);
-await page.locator('[data-paint=red]').click();await page.locator('[data-interior=beige]').click();await page.waitForTimeout(700);assert.equal(await page.locator('#paint-name').textContent(),'Radiant Red');assert.equal(await page.locator('#interior-name').textContent(),'Linen');assert.equal(await page.locator('[data-paint=red]').getAttribute('aria-pressed'),'true');checks.push('Paint and leather selection work');
-await page.locator('#engine-start').click();await page.waitForTimeout(1200);assert.equal(await page.locator('#engine-start').getAttribute('aria-pressed'),'true');
-const rms=await page.evaluate(()=>{const a=new Float32Array(2048);window.__qaMeter.getFloatTimeDomainData(a);return Math.sqrt(a.reduce((s,x)=>s+x*x,0)/a.length);});assert.ok(rms>0.00001,'Audio RMS '+rms);await page.locator('#rev').click();await page.waitForTimeout(1900);await page.locator('#exhaust').click();await page.waitForTimeout(1200);checks.push('Web Audio outputs non-zero PCM; engine/rev/exhaust work');
-await page.locator('#engine-start').click();assert.equal(await page.locator('#rev').isDisabled(),true);
-await page.locator('#configuration').scrollIntoViewIfNeeded();await page.waitForTimeout(1200);await shot('qa-config');
-await page.locator('#share').click();const shared=await page.evaluate(()=>navigator.clipboard.readText());assert.ok(shared.includes('paint=red')&&shared.includes('interior=beige'));checks.push('Share URL encodes both colours');
-await page.locator('#theme-toggle').click();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');await page.reload();await ready();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');await shot('qa-light');await page.locator('#theme-toggle').click();checks.push('Theme persists after reload');
-await page.locator('#gallery-next').click();await page.waitForFunction(()=>document.getElementById('gallery-image').complete&&document.getElementById('gallery-image').naturalWidth>0);assert.equal(await page.locator('#gallery-count').textContent(),'02 / 03');await page.locator('#gallery-prev').click();assert.equal(await page.locator('#gallery-count').textContent(),'01 / 03');checks.push('Gallery navigation and local photos work');await page.locator('#craft').scrollIntoViewIfNeeded();await page.waitForTimeout(1200);await shot('qa-gallery');
-await page.locator('#annual-distance').fill('0');await page.locator('#annual-distance').dispatchEvent('input');assert.equal(await page.locator('#fuel-total').textContent(),'$0');await page.locator('#annual-distance').fill('15000');await page.locator('#annual-distance').dispatchEvent('input');assert.equal(await page.locator('#fuel-total').textContent(),'$3,508');checks.push('Fuel estimator handles zero and weighted mpg');await page.locator('.ownership').scrollIntoViewIfNeeded();await page.waitForTimeout(1200);await shot('qa-ownership');
-await page.locator('#source-notes').evaluate(el=>el.parentElement.open=true);assert.equal(await page.locator('#source-notes a').count(),6);await page.locator('#performance').scrollIntoViewIfNeeded();await page.waitForTimeout(1200);await shot('qa-comparison');
-await page.setViewportSize({width:375,height:812});await page.goto(base);await ready();await shot('qa-mobile');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);checks.push('375px: no horizontal page overflow');
-await page.locator('#configuration').scrollIntoViewIfNeeded();await page.waitForTimeout(1200);await shot('qa-mobile-config');
-await page.locator('#show-interior').click();await page.waitForTimeout(1300);await shot('qa-interior');checks.push('Interior camera preset works');
-await page.waitForFunction(()=>document.getElementById('offline-state').textContent.includes('ВСЁ СОХРАНЕНО'),{timeout:15000});await context.setOffline(true);await page.reload();await ready();assert.equal(await page.locator('canvas').count(),1);await page.locator('#gallery-next').click();await page.waitForFunction(()=>document.getElementById('gallery-image').complete&&document.getElementById('gallery-image').naturalWidth>0);await page.locator('#engine-start').click();assert.equal(await page.locator('#engine-start').getAttribute('aria-pressed'),'true');await page.locator('#engine-start').click();checks.push('Offline reload: model, photos, JS and audio work');await context.setOffline(false);
-await page.emulateMedia({reducedMotion:'reduce'});await page.reload();await ready();await page.waitForTimeout(5200);assert.ok(!(await page.locator('#rotation-label').textContent()).includes('АВТОВРАЩЕНИЕ'));checks.push('Reduced motion disables automatic rotation');
-assert.deepEqual(errors,[]);checks.push('No console errors or uncaught exceptions');fs.writeFileSync(output+'/qa-results.json',JSON.stringify({checks,errors,audioRms:rms},null,2));console.log(JSON.stringify({checks,errors,audioRms:rms},null,2));}finally{await browser.close();}
+// Не входит в npm test: требует локального Playwright и запущенного preview.
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+let chromium;
+try {
+  ({ chromium } = require("playwright"));
+} catch {
+  ({ chromium } = require("/vercel/sandbox/node_modules/playwright"));
+}
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const browser = await chromium.launch({
+  executablePath:
+    process.env.CHROMIUM ||
+    (fs.existsSync("/usr/local/bin/chromium")
+      ? "/usr/local/bin/chromium"
+      : undefined),
+  headless: true,
+  args: [
+    "--no-sandbox",
+    "--enable-unsafe-swiftshader",
+    "--use-angle=swiftshader",
+    "--disable-dev-shm-usage",
+  ],
+});
+const base = process.env.QA_URL || "http://localhost:4174/";
+const results = [];
+const shots = process.env.QA_SCREENSHOTS || "tests/screenshots";
+fs.mkdirSync(shots, { recursive: true });
+try {
+  for (const width of [1920, 375]) {
+    const height = width === 375 ? 812 : 1080;
+    const ctx = await browser.newContext({ viewport: { width, height } });
+    await ctx.addInitScript(() => {
+      const Original = window.AudioContext;
+      window.AudioContext = class extends Original {
+        constructor(...args) {
+          super(...args);
+          window.__qaAudio = this;
+        }
+        async decodeAudioData(...args) {
+          const buffer = await super.decodeAudioData(...args);
+          window.__qaBuffer = buffer;
+          return buffer;
+        }
+      };
+    });
+    const p = await ctx.newPage(),
+      errors = [];
+    p.on("pageerror", (e) => errors.push(e.message));
+    p.on("console", (m) => {
+      if (m.type() === "error") errors.push(m.text());
+    });
+    await p.goto(base);
+    await p.waitForFunction(
+      () => document.documentElement.dataset.viewerReady === "true",
+    );
+    await p.waitForTimeout(1400);
+    assert.equal(
+      await p.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+      false,
+    );
+    await p.screenshot({ path: `${shots}/hero-${width}.png` });
+    await p.locator("[data-studio-mode=spin]").click();
+    await p.waitForFunction(() =>
+      document.querySelector("#hero-car").src.includes("spin-"),
+    );
+    await p.locator("#viewer").focus();
+    const before = await p.locator("#hero-car").getAttribute("src");
+    await p.keyboard.press("ArrowRight");
+    assert.notEqual(await p.locator("#hero-car").getAttribute("src"), before);
+    await p.locator("[data-studio-mode=interior]").click();
+    await p.waitForFunction(() =>
+      document
+        .querySelector("#viewer-status")
+        .textContent.includes("ПАНОРАМА 360"),
+    );
+    await p.waitForTimeout(800);
+    await p.screenshot({ path: `${shots}/panorama-${width}.png` });
+    await p.locator("[data-studio-mode=esv]").click();
+    const fixedHero = await p.locator("#hero-car").getAttribute("src");
+    const storyTop = await p
+      .locator("#experience")
+      .evaluate((e) => e.getBoundingClientRect().top + scrollY);
+    for (let i = 0; i < 5; i++) {
+      await p.evaluate(
+        (y) => scrollTo({ top: y, behavior: "instant" }),
+        storyTop + height * 4.7 * ((i + 0.65) / 5),
+      );
+      await p.waitForFunction(
+        (i) =>
+          Number(
+            getComputedStyle(document.querySelectorAll(".story-scene")[i])
+              .opacity,
+          ) > 0.98,
+        i,
+        { timeout: 15000 },
+      );
+      const top = await p
+        .locator("#story-stage")
+        .evaluate((e) => e.getBoundingClientRect().top);
+      assert.ok(Math.abs(top) < 3, "story pinned at viewport top");
+      assert.ok(
+        Number(
+          await p
+            .locator(".story-scene")
+            .nth(i)
+            .evaluate((e) => getComputedStyle(e).opacity),
+        ) > 0.98,
+        `correct scene ${i} is readable at ${await p.evaluate(() => scrollY)}, counter ${await p.locator("#story-counter").textContent()}, opacity ${await p
+          .locator(".story-scene")
+          .nth(i)
+          .evaluate((e) => getComputedStyle(e).opacity)}`,
+      );
+      await p.screenshot({ path: `${shots}/story-${i}-${width}.png` });
+    }
+    await p.locator("#configuration").evaluate((e) =>
+      scrollTo({
+        top: e.getBoundingClientRect().top + scrollY,
+        behavior: "instant",
+      }),
+    );
+    await p.waitForTimeout(1500);
+    await p.locator("[data-paint=red]").click();
+    await p.waitForFunction(
+      () =>
+        document.querySelector("#configuration-image").complete &&
+        document.querySelector("#configuration-image").naturalWidth > 0 &&
+        document
+          .querySelector("#configuration-image")
+          .src.includes("paint-red"),
+    );
+    assert.equal(await p.locator("#hero-car").getAttribute("src"), fixedHero);
+    await p.screenshot({ path: `${shots}/config-${width}.png` });
+    await p.locator("[data-interior=brown]").click();
+    await p.waitForFunction(
+      () =>
+        document.querySelector("#configuration-image").complete &&
+        document
+          .querySelector("#configuration-image")
+          .src.includes("interior-brown"),
+    );
+    assert.equal(await p.locator("#hero-car").getAttribute("src"), fixedHero);
+    await p.screenshot({ path: `${shots}/interior-${width}.png` });
+    await p.locator("#engine-start").click();
+    await p.waitForFunction(
+      () =>
+        document.querySelector("#engine-start").getAttribute("aria-pressed") ===
+        "true",
+    );
+    const audio = await p.evaluate(() => {
+      const b = window.__qaBuffer,
+        a = b.getChannelData(0),
+        r = b.getChannelData(1);
+      let energy = 0,
+        difference = 0;
+      for (let i = 0; i < a.length; i += 100) {
+        energy += a[i] * a[i];
+        difference += Math.abs(a[i] - r[i]);
+      }
+      return {
+        channels: b.numberOfChannels,
+        duration: b.duration,
+        energy,
+        difference,
+        state: window.__qaAudio.state,
+      };
+    });
+    assert.equal(audio.channels, 2);
+    assert.ok(audio.energy > 0 && audio.difference > 0);
+    assert.equal(audio.state, "running");
+    await p.locator("#rev").click();
+    await p.waitForTimeout(3250);
+    await p.locator("#exhaust").click();
+    await p.screenshot({ path: `${shots}/sound-${width}.png` });
+    await p.locator("#engine-start").click();
+    await p.locator("#craft").evaluate((e) =>
+      scrollTo({
+        top: e.getBoundingClientRect().top + scrollY,
+        behavior: "instant",
+      }),
+    );
+    await p.waitForTimeout(1200);
+    await p.locator("#gallery-next").click();
+    assert.equal(await p.locator("#gallery-count").textContent(), "02 / 03");
+    await p.waitForTimeout(900);
+    await p.screenshot({ path: `${shots}/gallery-${width}.png` });
+    await p.locator("#fuel-total").scrollIntoViewIfNeeded();
+    assert.equal(await p.locator("#fuel-total").textContent(), "$3,508");
+    await p.waitForTimeout(900);
+    await p.screenshot({ path: `${shots}/fuel-${width}.png` });
+    await p.locator("#theme-toggle").evaluate((e) => e.click());
+    assert.equal(await p.locator("html").getAttribute("data-theme"), "light");
+    await p.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+    await p.waitForTimeout(700);
+    await p.screenshot({ path: `${shots}/light-${width}.png` });
+    await p.waitForFunction(() =>
+      document
+        .querySelector("#offline-state")
+        .textContent.includes("OFFLINE-READY"),
+    );
+    await ctx.setOffline(true);
+    await p.reload();
+    await p.waitForFunction(
+      () => document.documentElement.dataset.viewerReady === "true",
+    );
+    await p.locator("[data-studio-mode=interior]").click();
+    await p.waitForFunction(() =>
+      document
+        .querySelector("#viewer-status")
+        .textContent.includes("ПАНОРАМА 360"),
+    );
+    assert.equal(errors.length, 0, errors.join("\n"));
+    results.push({
+      width,
+      height,
+      errors,
+      independentPreview: true,
+      pinnedScenes: 5,
+      stereoAudio: audio,
+      offline: true,
+    });
+    await ctx.close();
+  }
+  const ctx = await browser.newContext({
+      viewport: { width: 375, height: 812 },
+      reducedMotion: "reduce",
+    }),
+    p = await ctx.newPage();
+  await p.goto(base);
+  await p.waitForFunction(() =>
+    document.querySelector(".experience").classList.contains("no-motion"),
+  );
+  assert.equal(await p.locator(".story-scene[aria-hidden=false]").count(), 5);
+  assert.equal(await p.locator(".pin-spacer").count(), 0);
+  results.push({ reducedMotion: true, allScenesReadable: true });
+  await ctx.close();
+  fs.writeFileSync(
+    "tests/qa-results.json",
+    JSON.stringify(
+      { version: 2, checkedAt: new Date().toISOString(), results },
+      null,
+      2,
+    ),
+  );
+  console.log(JSON.stringify(results, null, 2));
+} finally {
+  await browser.close();
+}

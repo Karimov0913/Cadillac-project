@@ -5,3 +5,7 @@ assets/models/*.gltf
 assets/images/*.webp
 assets/images/*.png
 .DS_Store
+assets/v2/*.webp
+assets/v2/*.mp3
+tests/screenshots/
+assets/sounds/*.mp3

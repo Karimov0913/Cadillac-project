@@ -1,65 +1,470 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru" data-theme="dark">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1a1a2e">
-  <meta name="description" content="Escalade V-Series ESV: интерактивная 3D-студия. Выберите кузов и салон, услышьте V8, изучите технологии и стоимость топлива.">
-  <meta property="og:title" content="Escalade V-Series ESV — Presence, amplified.">
-  <meta property="og:description" content="682 силы. Ваш характер. Интерактивная 3D-студия Escalade ESV.">
-  <title>Escalade V-Series ESV | The V Studio</title>
-  <link rel="icon" href="./assets/images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./css/style.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem('v-theme')||'dark'}catch{}</script>
-  <script type="module" src="./js/app.js"></script>
-</head>
-<body>
-<a class="skip" href="#studio">Перейти к конфигуратору</a>
-<div class="cursor-dot" aria-hidden="true"></div><div class="cursor-trail" aria-hidden="true"></div>
-<header class="nav-shell">
-  <a class="wordmark" href="#home" aria-label="Escalade V Studio, главная"><span class="v-mark" aria-hidden="true">V</span><span>ESCALADE<span class="wordmark-sub">THE V STUDIO · ESV</span></span></a>
-  <nav aria-label="Основная навигация"><a href="#studio">Конфигуратор</a><a href="#performance">Характеристики</a><a href="#craft">Детали</a></nav>
-  <div class="nav-actions"><button id="theme-toggle" class="icon-button" aria-label="Включить светлую тему" title="Сменить тему">◐</button><button id="share" class="share-button">Поделиться <span aria-hidden="true">↗</span></button></div>
-</header>
-<main>
-<section class="hero" id="home" aria-labelledby="hero-title">
-  <div class="hero-top"><span class="eyebrow"><i></i> AMERICAN LUXURY. UNLEASHED.</span><span class="edition">V-SERIES / EXTENDED WHEELBASE</span></div>
-  <div class="hero-copy"><h1 id="hero-title">PRESENCE,<br><span>AMPLIFIED.</span></h1><p>Escalade V-Series ESV.<br>Мощь, которую не нужно объяснять.</p></div>
-  <div class="hero-side"><span class="vertical-label">6.2L SUPERCHARGED V8</span><span class="hero-index">01 <span>/ 04</span></span></div>
-  <div id="studio" class="studio" aria-label="3D-конфигуратор Escalade ESV">
-    <div id="viewer" tabindex="0" role="region" aria-label="3D-автомобиль: мышь — вращение, колесо — масштаб. Кнопки ракурсов доступны ниже."></div>
-    <div class="viewer-loading" id="viewer-loading"><span></span><p>Подготавливаем вашу студию…</p></div>
-    <div class="viewer-fallback" id="viewer-fallback" hidden><img src="./assets/images/exterior.webp" alt="Cadillac Escalade Sport Platinum, фотография"><p>3D недоступно на этом устройстве. Попробуйте браузер с WebGL 2.</p><button id="retry-3d" class="glass-button">Повторить загрузку</button></div>
-    <div class="studio-caption"><span class="live-dot"></span> <span id="viewer-mode">LIVE 3D</span> <span class="caption-divider">/</span> <span id="rotation-label">ПОТЯНИТЕ, ЧТОБЫ ВРАЩАТЬ</span></div>
-    <div class="view-controls" aria-label="Управление ракурсом"><button data-view="front" title="Передний ракурс" aria-label="Передний ракурс">↖</button><button data-view="side" title="Боковой ракурс" aria-label="Боковой ракурс">↔</button><button data-view="interior" title="Крупный план салона" aria-label="Крупный план салона">⌂</button><button data-view="reset" title="Сбросить камеру" aria-label="Сбросить камеру"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6"/></svg></button><button id="rotation-toggle" aria-pressed="false" title="Автовращение" aria-label="Автовращение"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13a9 9 0 1 1-2-7M21 5v6h-6"/></svg></button></div>
-  </div>
-  <div class="hero-bottom"><div class="hero-spec"><strong>682<span>hp</span></strong><small>БЕЗ КОМПРОМИССОВ</small></div><div class="hero-spec"><strong>4.4<span>s</span></strong><small>0–60 MPH · CADILLAC*</small></div><div class="hero-spec"><strong>6.2<span>L</span></strong><small>SUPERCHARGED V8</small></div><a class="scroll-cue" href="#configuration">Создайте свой характер <span>↓</span></a></div>
-</section>
-<section class="configuration wrap" id="configuration" aria-labelledby="config-title">
-  <div class="section-heading reveal"><div><span class="eyebrow">01 / YOUR SIGNATURE</span><h2 id="config-title">Ваш характер.<br><span>В каждой детали.</span></h2></div><p>Шесть оттенков кузова. Четыре настроения салона.<br>Один автомобиль, который невозможно не заметить.</p></div>
-  <div class="config-grid reveal">
-    <div class="glass config-panel"><div class="panel-heading"><span class="eyebrow">ЭКСТЕРЬЕР</span><span class="panel-number">01</span></div><div class="selected-name"><h3 id="paint-name">Argent Silver</h3><span id="paint-code">METALLIC</span></div><div id="paint-swatches" class="swatches" role="group" aria-label="Цвет кузова"></div><p class="muted">Плавный переход. Реальные отражения.<br>Оттенки — визуальная интерпретация палитры.</p></div>
-    <div class="glass config-panel"><div class="panel-heading"><span class="eyebrow">ИНТЕРЬЕР</span><span class="panel-number">02</span></div><div class="selected-name"><h3 id="interior-name">Jet Black</h3><span>LEATHER STUDY</span></div><div id="interior-swatches" class="swatches leather-swatches" role="group" aria-label="Цвет кожи салона"></div><div class="leather-preview" id="leather-preview"><span>SEMI-ANILINE INSPIRED</span></div><button id="show-interior" class="text-button">Рассмотреть салон <span>↗</span></button></div>
-    <div class="glass sound-panel"><div class="panel-heading"><span class="eyebrow">THE SOUND OF V</span><span class="sound-status" id="sound-status">OFF</span></div><h3>Не просто слышать.<br>Чувствовать.</h3><div class="equalizer" aria-hidden="true"></div><button id="engine-start" class="engine-button" aria-pressed="false"><span class="power-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9M6 6a9 9 0 1 0 12 0"/></svg></span><span id="engine-label">Завести двигатель</span></button><div class="sound-actions"><button id="rev" disabled>Газ <span>↗</span></button><button id="exhaust" disabled>Выхлоп <span aria-hidden="true">~</span></button></div><label class="volume-label" for="volume">Громкость <input id="volume" type="range" min="0" max="100" value="25"><span id="volume-value">25%</span></label><p class="sound-disclaimer">Синтез V8 через Web Audio, не запись двигателя.<br>Наденьте наушники. Начните с небольшой громкости.</p></div>
-  </div>
-  <p class="model-note">3D — авторская дизайн-интерпретация ESV, не заводская CAD-модель. Цвета и геометрия демонстрационные. *4,4 с — оценка Cadillac для Escalade-V; не отдельный инструментальный тест ESV.</p>
-</section>
-<section class="performance" id="performance" aria-labelledby="performance-title">
-  <div class="wrap"><div class="section-heading reveal"><div><span class="eyebrow">02 / ENGINEERED TO EXCEED</span><h2 id="performance-title">Другая лига.</h2></div><p>Компрессорная мощь V8.<br>Присутствие вне конкуренции.</p></div>
-  <div class="comparison-shell glass reveal"><table><caption class="sr-only">Сравнение Cadillac Escalade-V ESV, GMC Yukon Denali Ultimate и Lincoln Navigator L Black Label</caption><thead><tr><th scope="col">Характеристика</th><th scope="col" class="featured"><span class="table-badge">V-SERIES</span>Cadillac Escalade-V ESV<small>2027 · официальные данные</small></th><th scope="col">GMC Yukon<small>Denali Ultimate · 2024</small></th><th scope="col">Lincoln Navigator L<small>Black Label · 2024</small></th></tr></thead><tbody id="comparison-body"></tbody></table></div>
-  <details class="data-notes reveal"><summary>Источники, модельные годы и оговорки <span>+</span></summary><div id="source-notes"></div></details>
-  <div class="performance-quote reveal"><span class="outline-v" aria-hidden="true">V</span><div><span class="eyebrow">HAND-BUILT. SIGNED. SUPERCHARGED.</span><p>Большой не значит<br><em>медленный.</em></p><span class="muted">653 lb-ft крутящего момента · 10-ступенчатый автомат</span></div></div>
-  </div>
-</section>
-<section class="craft wrap" id="craft" aria-labelledby="craft-title"><div class="section-heading reveal"><div><span class="eyebrow">03 / THE FINER DETAILS</span><h2 id="craft-title">Роскошь.<br><span>Без лишних слов.</span></h2></div><div class="gallery-nav"><button id="gallery-prev" class="icon-button" aria-label="Предыдущее фото">←</button><span id="gallery-count">01 / 03</span><button id="gallery-next" class="icon-button" aria-label="Следующее фото">→</button></div></div>
-  <figure class="gallery reveal"><img id="gallery-image" src="./assets/images/exterior.webp" alt="Cadillac Escalade Sport Platinum, вид спереди" width="1440" height="960" loading="lazy"><figcaption><span id="gallery-title">Commanding presence.</span><span id="gallery-description">Escalade Sport Platinum · справочная фотография, не V-Series ESV</span><a id="gallery-credit" href="https://commons.wikimedia.org/wiki/File:Cadillac_Escalade_Sport_Platinum_GMTT1XX_Black_Raven_(5).jpg" target="_blank" rel="noopener">Wikimedia Commons ↗</a></figcaption></figure>
-  <div class="technology-grid"><article class="tech-card reveal"><span class="tech-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M22 7v10M2 7v10"/></svg></span><span class="eyebrow">IMMERSIVE SOUND</span><h3>38 <small>динамиков</small></h3><p>AKG Studio Reference.<br>Звук, который окружает.</p><small>Новая версия · 36 динамиков у модели 2024</small></article><article class="tech-card reveal"><span class="tech-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5Q12 3 21 5v13Q12 16 3 18zM8 21h8M12 18v3"/></svg></span><span class="eyebrow">HORIZON DISPLAY</span><h3>55″</h3><p>Панорамный дисплей.<br>Всё важное — перед вами.</p><small>Общая диагональ · не «55″ OLED»</small></article><article class="tech-card reveal"><span class="tech-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3L2 21M17 3l5 18M12 3v4M12 10v4M12 17v4"/></svg></span><span class="eyebrow">SUPER CRUISE®</span><h3>Свобода.</h3><p>Hands-free на совместимых дорогах.<br>С постоянным вниманием водителя.</p><small>Требуются совместимая дорога и активный план</small></article><article class="tech-card reveal"><span class="tech-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2v3l-5 3 10 4-10 4 10 3-5 2v1M4 2h16M4 22h16"/></svg></span><span class="eyebrow">MAGNETIC RIDE CONTROL</span><h3>Баланс.</h3><p>Адаптивная подвеска.<br>Точность в каждом движении.</p><small>В сочетании с Air Ride Adaptive Suspension</small></article></div>
-</section>
-<section class="ownership wrap" aria-labelledby="ownership-title"><div class="ownership-copy reveal"><span class="eyebrow">04 / KNOW YOUR JOURNEY</span><h2 id="ownership-title">Мощь в цифрах.<br><span>И в вашем бюджете.</span></h2><p>Прикиньте годовой расход на топливо.<br>Без скрытой математики.</p><span class="ownership-note">Оценка только топлива: без страховки, налогов, обслуживания и амортизации. Рекомендуется premium gasoline. Расход зависит от года, маршрута и стиля езды.</span></div>
-  <form class="glass calculator reveal" id="fuel-form"><div class="calculator-top"><span class="eyebrow">FUEL ESTIMATOR</span><span>USD / YEAR</span></div><label for="annual-distance">Пробег в год <span>км</span></label><input id="annual-distance" type="number" min="0" max="500000" value="15000" step="500" required><label for="fuel-price">Цена топлива <span>USD / литр</span></label><input id="fuel-price" type="number" min="0" max="100" value="1.25" step="0.05" required><label for="city-share">Доля города <span id="city-share-value">60%</span></label><input id="city-share" type="range" min="0" max="100" value="60"><label for="efficiency-profile">Профиль расхода</label><select id="efficiency-profile"><option value="verified">11 / 16 mpg · справочный 2024 V</option><option value="brief">11 / 17 mpg · сценарий из задания</option></select><div class="calculator-result" aria-live="polite"><span>Топливо / год</span><output id="fuel-total">$3,556</output><small id="fuel-details">—</small></div><p class="formula-note">Взвешенный расход = город × 235,215/11 + трасса × 235,215/16 л/100 км. Не среднее арифметическое mpg.</p></form>
-</section>
-<section class="closing wrap reveal"><span class="eyebrow">NOT FOR EVERYONE. MADE FOR YOU.</span><h2>Оставьте<br><span>свою подпись.</span></h2><a class="glass-button" href="#studio">Вернуться в студию <span>↗</span></a><button id="share-bottom" class="text-button">Поделиться конфигурацией ↗</button></section>
-</main>
-<footer class="wrap"><a class="footer-brand" href="#home">THE V STUDIO.</a><p>Независимый демонстрационный проект. Не связан с Cadillac или General Motors.<br>Товарные знаки принадлежат владельцам. Цены в USD, без налогов и сборов.</p><a href="./SOURCES.md">Источники и лицензии ↗</a><span id="offline-state">OFFLINE-READY / ЗАГРУЗКА КЭША</span></footer>
-<div id="toast" class="toast glass" role="status" aria-live="polite"></div>
-<noscript><p class="noscript">Для 3D-конфигуратора нужен JavaScript. Характеристики и фотографии доступны в README и SOURCES.</p></noscript>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101119" />
+    <meta
+      name="description"
+      content="Cadillac Escalade V-Series ESV: настоящие заводские изображения, 360°-просмотр V-Series, панорама салона, кинематографичный скролл и записанный V8."
+    />
+    <title>Escalade V-Series ESV | The V Studio</title>
+    <link rel="icon" href="./assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("v-theme") || "dark";
+      } catch {}
+    </script>
+    <script type="module" src="./js/app.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#configuration">Перейти к конфигуратору</a>
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-trail" aria-hidden="true"></div>
+    <header class="nav-shell">
+      <a class="wordmark" href="#home"
+        ><span class="v-mark" aria-hidden="true">V</span
+        ><span>ESCALADE<small>THE V STUDIO · ESV</small></span></a
+      >
+      <nav aria-label="Основная навигация">
+        <a href="#experience">Характер</a
+        ><a href="#configuration">Конфигуратор</a
+        ><a href="#performance">Сравнение</a>
+      </nav>
+      <div class="nav-actions">
+        <button
+          id="theme-toggle"
+          class="icon-button"
+          aria-label="Включить светлую тему"
+        >
+          ◐</button
+        ><button id="share" class="share-button">
+          Поделиться <span>↗</span>
+        </button>
+      </div>
+    </header>
+    <main>
+      <section class="hero" id="home" aria-labelledby="hero-title">
+        <div class="hero-top">
+          <span class="eyebrow">AMERICAN LUXURY. UNLEASHED.</span
+          ><span class="edition">V-SERIES / EXTENDED WHEELBASE</span>
+        </div>
+        <div class="hero-copy">
+          <h1 id="hero-title">ESCALADE.</h1>
+          <div class="hero-subtitle">V-SERIES <span>ESV</span></div>
+          <p>
+            Мощь, которую не нужно объяснять.<br />Настоящий Cadillac. В каждой
+            линии.
+          </p>
+        </div>
+        <div class="studio" id="studio">
+          <div
+            id="viewer"
+            tabindex="0"
+            role="region"
+            aria-label="Заводские изображения Escalade: выберите ESV, вращение V-Series или панораму салона"
+          >
+            <img
+              id="hero-car"
+              src="./assets/v2/esv-hero.webp"
+              width="1440"
+              height="634"
+              alt="Cadillac Escalade-V ESV, официальное изображение длиннобазной версии"
+              fetchpriority="high"
+              draggable="false"
+            />
+            <div id="panorama" hidden></div>
+          </div>
+          <div class="studio-floor" aria-hidden="true"></div>
+        </div>
+        <div class="studio-toolbar">
+          <span class="viewer-status" id="viewer-status"
+            >ESV · ЗАВОДСКОЕ ИЗОБРАЖЕНИЕ</span
+          >
+          <div class="mode-buttons" role="group" aria-label="Режим просмотра">
+            <button data-studio-mode="esv" aria-pressed="true">ESV</button
+            ><button data-studio-mode="spin" aria-pressed="false">
+              V / 360°</button
+            ><button data-studio-mode="interior" aria-pressed="false">
+              Салон 360°</button
+            ><button
+              id="rotation-toggle"
+              aria-label="Автовращение V-Series"
+              aria-pressed="true"
+              title="Вращение включается через 5 секунд бездействия"
+            >
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path d="M20 7v5h-5M20 12a8 8 0 1 0-2 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="hero-bottom">
+          <div class="hero-spec">
+            <strong>682 <span>hp</span></strong
+            ><small>SUPERCHARGED V8</small>
+          </div>
+          <div class="hero-spec">
+            <strong>4.4 <span>s</span></strong
+            ><small>0–60 MPH · CADILLAC*</small>
+          </div>
+          <div class="hero-spec">
+            <strong>6.2 <span>L</span></strong
+            ><small>HAND-BUILT ENGINE</small>
+          </div>
+          <a class="scroll-cue" href="#experience"
+            >Почувствовать характер <span>↓</span></a
+          >
+        </div>
+      </section>
+      <div class="viewer-note wrap">
+        ESV — точное заводское изображение длинной базы. Вращение V / 360° — 16
+        заводских кадров стандартного Escalade-V, не ESV и не свободная
+        3D-модель. Салон — фотографическая панорама V-Series. © Cadillac / GM.
+      </div>
+      <section
+        class="experience"
+        id="experience"
+        aria-label="Кинематографические характеристики Cadillac"
+      >
+        <div class="story-stage" id="story-stage">
+          <div class="story-progress">
+            <span>THE V EXPERIENCE</span><span id="story-counter">01 / 05</span>
+          </div>
+          <div class="story-scenes" id="story-scenes"></div>
+          <div class="story-bottom">
+            <span>ЛИСТАЙТЕ. ОТКРЫВАЙТЕ ДЕТАЛИ.</span>
+            <div class="story-track"><i id="story-progress-bar"></i></div>
+            <span aria-hidden="true">↓</span>
+          </div>
+        </div>
+      </section>
+      <section
+        class="configuration wrap"
+        id="configuration"
+        aria-labelledby="config-title"
+      >
+        <div class="section-heading reveal">
+          <div>
+            <span class="eyebrow">YOUR SIGNATURE / YOUR VIEW</span>
+            <h2 id="config-title">
+              Ваш характер.<br /><span>Прямо перед вами.</span>
+            </h2>
+          </div>
+          <p>
+            Выбирайте цвет и сразу смотрите результат рядом.<br />Главный
+            автомобиль наверху остаётся без изменений.
+          </p>
+        </div>
+        <div class="config-layout">
+          <div class="config-preview glass" id="config-preview">
+            <div class="preview-top">
+              <span class="eyebrow">2D CONFIGURATION</span>
+              <div
+                class="preview-tabs"
+                role="group"
+                aria-label="Режим локального превью"
+              >
+                <button data-preview-mode="exterior" aria-pressed="true">
+                  Кузов</button
+                ><button data-preview-mode="interior" aria-pressed="false">
+                  Салон
+                </button>
+              </div>
+            </div>
+            <div class="preview-media">
+              <img
+                id="configuration-image"
+                src="./assets/v2/paint-silver.webp"
+                alt="Escalade-V в цвете Argent Silver"
+                width="1440"
+                height="720"
+                draggable="false"
+              />
+            </div>
+            <div class="preview-caption">
+              <h3 id="configuration-name">Argent Silver</h3>
+              <p id="configuration-note">
+                Заводское изображение V-Series · стандартная база
+              </p>
+            </div>
+          </div>
+          <div class="config-controls">
+            <div class="glass config-panel">
+              <div class="panel-heading">
+                <span class="eyebrow">ЭКСТЕРЬЕР</span><span>01</span>
+              </div>
+              <div class="selected-name">
+                <h3 id="paint-name">Argent Silver</h3>
+                <small id="paint-code">ЗАВОДСКОЙ ОТТЕНОК</small>
+              </div>
+              <div
+                id="paint-swatches"
+                class="swatches"
+                role="group"
+                aria-label="Цвет кузова"
+              ></div>
+              <p class="panel-note">
+                Пять заводских цветов и один синий кастомный эскиз. Превью
+                меняется здесь, а не в начале страницы.
+              </p>
+            </div>
+            <div class="glass config-panel">
+              <div class="panel-heading">
+                <span class="eyebrow">ИНТЕРЬЕР</span><span>02</span>
+              </div>
+              <div class="selected-name">
+                <h3 id="interior-name">Jet Black</h3>
+                <small>ФОТОГРАФИЧЕСКОЕ ПРЕВЬЮ</small>
+              </div>
+              <div
+                id="interior-swatches"
+                class="swatches leather-swatches"
+                role="group"
+                aria-label="Цвет салона"
+              ></div>
+              <p class="panel-note" id="interior-note">
+                V-Series · заводской интерьер
+              </p>
+            </div>
+            <div class="glass sound-panel">
+              <div class="panel-heading">
+                <span class="eyebrow">THE REAL SOUND OF V8</span
+                ><span id="sound-status">OFF</span>
+              </div>
+              <h3>Восемь цилиндров.<br />Один характер.</h3>
+              <div class="equalizer" aria-hidden="true"></div>
+              <button
+                id="engine-start"
+                class="engine-button"
+                aria-pressed="false"
+              >
+                <span aria-hidden="true">▶</span
+                ><span id="engine-label">Включить V8</span>
+              </button>
+              <div class="sound-actions">
+                <button id="rev" disabled>Газ ↗</button
+                ><button id="exhaust" disabled>Сброс газа / выхлоп</button>
+              </div>
+              <label class="volume-label" for="volume"
+                >Громкость
+                <input
+                  id="volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="35"
+                /><span id="volume-value">35%</span></label
+              >
+              <p class="sound-disclaimer">
+                Реальная бинауральная стереозапись V8. Наденьте наушники.
+                Конкретная машина неизвестна — это не подтверждённая запись
+                Escalade.
+                <a
+                  href="https://freesound.org/people/overmedium/sounds/651534/"
+                  target="_blank"
+                  rel="noopener"
+                  >overmedium · CC0 ↗</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+        <p class="model-note">
+          Кузовное превью использует изображения стандартной базы V-Series;
+          удлинённая ESV показана в главном экране. Jet Black и Sheer Gray —
+          заводские интерьеры V-Series. Brandy и Renaissance Red — справочные
+          интерьеры Escalade Luxury, не доступные здесь опции V-Series.
+          Изображения и доступность опций зависят от модельного года.
+        </p>
+      </section>
+      <section
+        class="performance wrap"
+        id="performance"
+        aria-labelledby="performance-title"
+      >
+        <div class="section-heading reveal">
+          <div>
+            <span class="eyebrow">ENGINEERED TO EXCEED</span>
+            <h2 id="performance-title">Другая лига.</h2>
+          </div>
+          <p>
+            Проверенные источники. Прозрачные оговорки.<br />Без подмены
+            симуляции дорожным тестом.
+          </p>
+        </div>
+        <div class="comparison-shell glass reveal">
+          <table>
+            <caption class="sr-only">
+              Сравнение Cadillac Escalade-V ESV, GMC Yukon и Lincoln Navigator L
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Характеристика</th>
+                <th scope="col" class="featured">
+                  <span class="table-badge">V-SERIES</span>Cadillac Escalade-V
+                  ESV<small>2027 · официальные данные</small>
+                </th>
+                <th scope="col">
+                  GMC Yukon<small>Denali Ultimate · 2024</small>
+                </th>
+                <th scope="col">
+                  Lincoln Navigator L<small>Black Label · 2024</small>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="comparison-body"></tbody>
+          </table>
+        </div>
+        <details class="data-notes reveal">
+          <summary>Источники, модельные годы и методики <span>+</span></summary>
+          <div id="source-notes"></div>
+        </details>
+      </section>
+      <section class="craft wrap" id="craft">
+        <div class="section-heading reveal">
+          <div>
+            <span class="eyebrow">THE FINER DETAILS</span>
+            <h2>Роскошь.<br /><span>В настоящем кадре.</span></h2>
+          </div>
+          <div class="gallery-nav">
+            <button
+              id="gallery-prev"
+              class="icon-button"
+              aria-label="Предыдущее фото"
+            >
+              ←</button
+            ><span id="gallery-count">01 / 03</span
+            ><button
+              id="gallery-next"
+              class="icon-button"
+              aria-label="Следующее фото"
+            >
+              →
+            </button>
+          </div>
+        </div>
+        <figure class="gallery reveal">
+          <img
+            id="gallery-image"
+            src="./assets/v2/drive.webp"
+            width="1800"
+            height="1200"
+            alt="Официальное фото красного Cadillac Escalade-V"
+            loading="lazy"
+          />
+          <figcaption>
+            <div>
+              <h3 id="gallery-title">Presence in every line.</h3>
+              <p id="gallery-description">
+                Cadillac / GM · официальное изображение V-Series
+              </p>
+            </div>
+            <a
+              href="https://www.cadillac.com/suv/escalade/v-series"
+              target="_blank"
+              rel="noopener"
+              >© Cadillac / GM ↗</a
+            >
+          </figcaption>
+        </figure>
+      </section>
+      <section class="ownership wrap" aria-labelledby="ownership-title">
+        <div class="ownership-copy reveal">
+          <span class="eyebrow">KNOW YOUR JOURNEY</span>
+          <h2 id="ownership-title">
+            Мощь в цифрах.<br /><span>И в вашем бюджете.</span>
+          </h2>
+          <p>
+            Прикиньте годовой расход на топливо.<br />Без скрытой математики.
+          </p>
+          <p class="ownership-note">
+            Оценка только топлива: без страховки, налогов, обслуживания и
+            амортизации. Рекомендуется premium gasoline. Расход зависит от года,
+            маршрута и стиля езды.
+          </p>
+        </div>
+        <form class="glass calculator reveal" id="fuel-form">
+          <div class="calculator-top">
+            <span class="eyebrow">FUEL ESTIMATOR</span><span>USD / YEAR</span>
+          </div>
+          <label for="annual-distance">Пробег в год <span>км</span></label
+          ><input
+            id="annual-distance"
+            type="number"
+            min="0"
+            max="500000"
+            value="15000"
+            step="500"
+            required
+          /><label for="fuel-price">Цена топлива <span>USD / литр</span></label
+          ><input
+            id="fuel-price"
+            type="number"
+            min="0"
+            max="100"
+            value="1.25"
+            step="0.05"
+            required
+          /><label for="city-share"
+            >Доля города <span id="city-share-value">60%</span></label
+          ><input
+            id="city-share"
+            type="range"
+            min="0"
+            max="100"
+            value="60"
+          /><label for="efficiency-profile">Профиль расхода</label
+          ><select id="efficiency-profile">
+            <option value="verified">11 / 16 mpg · справочный 2024 V</option>
+            <option value="brief">11 / 17 mpg · сценарий из задания</option>
+          </select>
+          <div class="calculator-result" aria-live="polite">
+            <span>Топливо / год</span><output id="fuel-total">—</output
+            ><small id="fuel-details">—</small>
+          </div>
+          <p class="formula-note">Расход взвешивается по расстоянию.</p>
+        </form>
+      </section>
+      <section class="closing wrap reveal">
+        <span class="eyebrow">NOT FOR EVERYONE. MADE FOR YOU.</span>
+        <h2>Оставьте<br /><span>свою подпись.</span></h2>
+        <a class="glass-button" href="#configuration">Создать конфигурацию ↗</a
+        ><button id="share-bottom" class="text-button">
+          Поделиться конфигурацией ↗
+        </button>
+      </section>
+    </main>
+    <footer class="wrap">
+      <a class="footer-brand" href="#home">THE V STUDIO.</a>
+      <p>
+        Независимый демонстрационный проект. Не связан с Cadillac / General
+        Motors.<br />Заводские изображения © Cadillac / GM — не MIT и не
+        Creative Commons.<br />Звук V8: overmedium / Freesound, CC0. Все марки
+        принадлежат владельцам.
+      </p>
+      <a href="./SOURCES.md">Источники и права ↗</a
+      ><span id="offline-state">OFFLINE / ПОДГОТОВКА КЭША</span
+      ><span
+        >*4,4 с — оценка Cadillac для Escalade-V, не отдельный тест ESV.</span
+      >
+    </footer>
+    <div id="toast" class="toast glass" role="status" aria-live="polite"></div>
+    <noscript
+      ><p class="noscript">
+        Фотографии доступны без JavaScript. Интерактивность, звук и конфигуратор
+        требуют JavaScript.
+      </p></noscript
+    >
+  </body>
+</html>
